@@ -2,6 +2,7 @@
 import numpy as np
 import random
 import cython
+from tqdm import tqdm
 
 @cython.cdivision(True)
 class RansacClass:
@@ -19,29 +20,27 @@ class RansacClass:
     def find_best_plane(self):
         best_plane = None
         best_inliers = []
-        for _ in range(self.iterations):
-            random_indices = random.sample(range(len(self.propoints)), 3)
-            random_points = self.points[random_indices]
-                    
-            
-            plane = np.cross(random_points[1] - random_points[0], random_points[2] - random_points[0])
-
-            plane_norm=np.linalg.norm(plane)
+        plane_norm = 0
+        for _ in tqdm(range(self.iterations), desc="Finding best plane"):
+            while plane_norm == 0:
+                random_indices = random.sample(range(len(self.propoints)), 3)
+                random_points = self.points[random_indices]
+                plane = np.cross(random_points[1] - random_points[0], random_points[2] - random_points[0])
+                plane_norm=np.linalg.norm(plane)
 
             distances = []
             for i in range(len(self.points)):
-                if self.points[i][2] <= 0:
+                if self.points[i][2] <= 0.15:
                     distances.append(self.threshold+10) # max, will never be conisdered
                 else:
                     distances.append(np.abs(np.divide(np.dot(self.points[i], plane), plane_norm)))
             distances = np.array(distances) 
             inlier_indices = np.where(distances <= self.threshold)
-            inlier_mask = np.where(distances <= self.threshold, 1,0 )
-            vert_with_inliers = self.points & inlier_mask
-            inliers = self.points[inlier_indices]
+            inlier_mask = distances <= self.threshold
+            inliers = self.points[inlier_mask]
+
 
             if len(inliers) > len(best_inliers):
                 best_inliers = inliers
-                best_massk = vert_with_inliers
- 
-        return best_inliers, best_massk
+                best_inlier_indices = inlier_indices
+        return best_inliers, best_inlier_indices
