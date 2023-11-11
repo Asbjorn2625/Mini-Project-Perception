@@ -15,11 +15,12 @@ def resizeImage(image, scale_percent = 50):
 folder = f"{os.getcwd()}\\data\\" 
 intrinsic = np.load(folder + "intrinsics.npz")
 sorted(intrinsic.files)
-npzfile = np.load(folder + "verts4.npz")
+npzfile = np.load(folder + "verts1.npz")
 sorted(npzfile.files)
 verts = npzfile['verts']
 texcoords = npzfile['texcoords']
 coloursource = npzfile['color_source']
+cv2.imwrite("Colour image.png", coloursource)
 recolour = resizeImage(coloursource,50)
 
 cv2.imshow("hej", recolour)

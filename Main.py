@@ -26,7 +26,7 @@ def remove_non_green_verts(verts, texcoords, color_source):
         y_color = (texcoords[i, 1] * (color_source.shape[1] - 1)).round().astype(int)
         
         tmp = Hsvimage[x_color,y_color]
-        if (tmp[0] > 35 and tmp[0] < 85) and (tmp[1] > 25 and tmp[1] < 255) and (tmp[2] > 25 and tmp[2] < 255):
+        if (tmp[0] > 45 and tmp[0] < 65) and (tmp[1] > 35 and tmp[1] < 255) and (tmp[2] > 35 and tmp[2] < 255):
             verts[i] = [0,0,0]
     green_verts = np.array(verts)
     return green_verts
@@ -46,7 +46,6 @@ def plot_inliers_on_color(index, texcoords, color_source):
     kernel = np.ones((5,5),np.uint8)
     mask = cv2.dilate(mask,kernel,iterations = 5)
 
-    
     #Bitwise and with original image
     res = cv2.bitwise_and(color_source, color_source, mask=mask)
     return res
@@ -70,10 +69,6 @@ coloursource = npzfile['color_source']
 #plt.scatter(texcoords[:,0], texcoords[:,1], s=0.1)
 #plt.show()
 
-
-
-
-
 # Set points with x,y or z values greater than 5 to 0
 
 verts[np.abs(verts[:, 0]) > 5] = 0
@@ -88,13 +83,14 @@ cv2.imshow("image", recoloursource)
 # Remove non green verts
 green_verts = remove_non_green_verts(verts, texcoords, coloursource)
 
-Ransac = Ransac.RansacClass(green_verts, 5, 800)
+Ransac = Ransac.RansacClass(green_verts, 0.1, 100)
 bestinliers, indices = Ransac.find_best_plane()
 
 #WE TEST PLOT INLIERS ON COLOR
 inlierimg = plot_inliers_on_color(indices, texcoords, coloursource)
 inlierimg = resizeImage(inlierimg, 50)
 cv2.imshow("image", inlierimg)
+cv2.imwrite("inlierimg.png", inlierimg)
 
 # Plot the data
 fig = plt.figure()
@@ -134,24 +130,7 @@ ax1.legend()
 ax2.legend()
 plt.show()
 """
-#verts.shape = texcoords.shape
-#print(len(verts))
-#depth.shape = 1280X720=921600
-#rgb = 1920*1080= 2073600
 
-
-
-
-
-
-
-def plotplane(verts, plane):
-    """draw plane"""
-    
-    # Get the plane normal and point on plane
-    
-
-    return 0
 
 
 
